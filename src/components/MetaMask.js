@@ -16,6 +16,13 @@ export const MetaMask = () => {
   useEffect(() => {
     
   }, []);
+  const recognizeChainChange = async () => {
+    await ethereum?.on('chainChanged', async () => {
+      const currentChainId = await ethereum?.request({ method: 'eth_chainId' })
+      if (isMetaMaskOnboarded && currentChainId === process.env.REACT_APP_BLOCKCHAIN_NETWORK_ID && connectedWalletAddress) setMetaMaskIsReady(true)
+      else setMetaMaskIsReady(false)
+    });
+  }
 
   const checkMetaMaskOnboarding = () => {
     const result = MetaMaskOnboarding.isMetaMaskInstalled()
