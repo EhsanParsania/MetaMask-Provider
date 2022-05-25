@@ -41,7 +41,6 @@ export const MetaMaskProvider = (props) => {
 
 
   useEffect(() => {
-    console.log('render');
     (async () => {
       const id = await recognizeChainId()
       if (id !== chainId) {
