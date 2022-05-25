@@ -1,4 +1,4 @@
-# A complete template implementaion MetaMask in React
+# A complete template of MetaMask in React
 ### It supports adding a new network, chain change, and multiple wallets.
 ### How to run :
 $ npm i 
