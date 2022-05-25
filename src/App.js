@@ -1,5 +1,5 @@
 import './App.css';
-import { MetaMask } from './components/MetaMask';
+import { MetaMaskProvider } from './components/MetaMaskProvider';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
@@ -7,7 +7,7 @@ function App() {
     <div className="App">
       <header className="App-header">
         <div className='container'>
-          <MetaMask />
+          <MetaMaskProvider />
         </div>
       </header>
     </div>
