@@ -5,4 +5,4 @@ $ npm i
 
 $ npm start
 
-### Also you can just use the provider on the top of your app without reading the code It 
+### Also, you can only use the provider on the top of your app without involvement with the code
