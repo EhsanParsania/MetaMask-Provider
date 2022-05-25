@@ -7,7 +7,11 @@ function App() {
     <div className="App">
       <header className="App-header">
         <div className='container'>
-          <MetaMaskProvider />
+          <MetaMaskProvider >
+            
+              <h6 className='mt-5'> HERE YOUR APP HAS ACCESS TO ALL METAMASK INTERACTION</h6>
+         
+          </MetaMaskProvider>
         </div>
       </header>
     </div>

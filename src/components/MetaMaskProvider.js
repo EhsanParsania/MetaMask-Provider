@@ -178,7 +178,6 @@ export const MetaMaskProvider = (props) => {
         isMetaMaskOnboarded && connectedWalletAddress && chainId === process.env.REACT_APP_BLOCKCHAIN_NETWORK_ID &&
         <>
           <Hash address={connectedWalletAddress}></Hash>
-          <h6 className='mt-5'> HERE YOUR APP HAS ACCESS TO ALL METAMASK INTERACTION</h6>
           {children}
         </>
       }
