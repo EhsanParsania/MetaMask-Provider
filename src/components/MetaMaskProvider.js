@@ -23,6 +23,7 @@ export const MetaMaskProvider = (props) => {
     try {
       if (isMetaMaskOnboarded) {
         (async () => {
+          recognizeChainChange()
           const [account] = await window.ethereum?.request({ method: 'eth_accounts' })
           setConnectedWalletAddress(account)
           window.ethereum?.on('accountsChanged', async (accounts) => {
