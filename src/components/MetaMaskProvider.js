@@ -9,7 +9,7 @@ import { Hash } from './Hash';
 
 export const MetaMaskProvider = (props) => {
   const { ethereum } = window;
-  const [isMetaMaskOnboarded, setIsMetaMaskOnboarded] = useState(); // checking if metamask is installed
+  const [isMetaMaskOnboarded, setIsMetaMaskOnboarded] = useState(MetaMaskOnboarding.isMetaMaskInstalled()); // checking if metamask is installed
   const [connectedWalletAddress, setConnectedWalletAddress] = useState(); // checking if wallet address is connected
   const [connectWalletLoading, setConnectWalletLoading] = useState(false);
   const [metaMaskIsReady, setMetaMaskIsReady] = useState(false);
@@ -21,7 +21,6 @@ export const MetaMaskProvider = (props) => {
 
   useEffect(() => {
     try {
-      checkMetaMaskOnboarding()
       if (isMetaMaskOnboarded) {
         (async () => {
           await recognizeChainChange()
@@ -68,11 +67,6 @@ export const MetaMaskProvider = (props) => {
       Alert(error.message)
       console.log(error)
     }
-  }
-
-  const checkMetaMaskOnboarding = () => {
-    const result = MetaMaskOnboarding.isMetaMaskInstalled()
-    setIsMetaMaskOnboarded(result)
   }
 
   const connectWallet = async () => {
