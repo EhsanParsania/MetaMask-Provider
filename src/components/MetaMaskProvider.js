@@ -129,6 +129,25 @@ export const MetaMaskProvider = (props) => {
     }
   }
 
+  const addToken = async () => {
+    try {
+      await ethereum?.request({
+        method: 'wallet_watchAsset',
+        params: {
+          type: 'ERC20',
+          options: {
+            address: '0x295AB84c45545c6c55aA86711e9B06a6768B5eB4',
+            symbol: 'EP7',
+            decimals: 18,
+            image: '',
+          },
+        },
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   const addChain = async () => {
     try {
       await ethereum?.request({
