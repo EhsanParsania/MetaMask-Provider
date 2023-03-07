@@ -191,6 +191,9 @@ export const MetaMaskProvider = (props) => {
         isMetaMaskOnboarded && connectedWalletAddress && chainId === process.env.REACT_APP_BLOCKCHAIN_NETWORK_ID &&
         <>
           <Hash address={connectedWalletAddress}></Hash>
+          <Button className={`btn-danger px-5`} onClick={addToken} >
+            ADD TOKEN
+          </Button>
           {children}
         </>
       }
