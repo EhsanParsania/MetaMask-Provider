@@ -1,202 +1,181 @@
-import React, { useEffect, useState } from 'react'
-import MetaMaskOnboarding from '@metamask/onboarding';
+import { createContext, useState, useEffect } from 'react'
+import Web3 from "web3"
+import MetaMaskOnboarding from '@metamask/onboarding'
+import detectEthereumProvider from '@metamask/detect-provider'
+import { getMetamaskTokenOptions } from './helper'
+import { Hash } from './Hash'
 import { MetaMaskInstallModal } from './MetaMaskInstallModal';
 import { Button } from 'react-bootstrap';
-import { Alert } from 'bootstrap';
-import { chain } from '../utils/helper'
-import { Hash } from './Hash';
+import './metamaskProvider.css'
 
+export const MetaMaskContext = createContext()
 
-export const MetaMaskProvider = (props) => {
-  const { ethereum } = window;
-  const [isMetaMaskOnboarded] = useState(MetaMaskOnboarding.isMetaMaskInstalled()); // checking if metamask is installed
-  const [connectedWalletAddress, setConnectedWalletAddress] = useState(); // checking if wallet address is connected
-  const [connectWalletLoading, setConnectWalletLoading] = useState(false);
-  const [metaMaskIsReady, setMetaMaskIsReady] = useState(false);
-  const [chainId, setChainId] = useState();
-  const [changeChainLoading, setChangeChainLoading] = useState(false);
-  const [chainChanged, setChainChanged] = useState(false);
+export const MetaMaskProvider = ({ children }) => {
+  const [provider, setProvider] = useState()
+  const [web3, setWeb3] = useState()
 
-  const { children } = props
+  const [desiredChainId] = useState(process.env.REACT_APP_BLOCKCHAIN_NETWORK_ID)
+  const [desiredChainName] = useState(process.env.REACT_APP_BLOCKCHAIN_NETWORK_NAME)
 
+  const [chainId, setChainId] = useState()
+  const [connectedAccount, setConnectedAccount] = useState()
+  const [metaMaskIsReady, setMetaMaskIsReady] = useState(false)
+
+  const [changeChainLoading, setChangeChainLoading] = useState(false)
+  const [connectWalletLoading, setConnectWalletLoading] = useState(false)
+
+  const contextStore = {
+    provider,
+    web3,
+    chainId,
+    account: connectedAccount,
+  }
+
+  // init metamask provider and web3
   useEffect(() => {
-    try {
-      if (isMetaMaskOnboarded) {
-        (async () => {
-          recognizeChainChange()
-          const [account] = await window.ethereum?.request({ method: 'eth_accounts' })
-          setConnectedWalletAddress(account)
-          window.ethereum?.on('accountsChanged', async (accounts) => {
-            if (!accounts.length) setMetaMaskIsReady(false)
-            setConnectedWalletAddress(accounts[0])
-          });
-        })();
-      }
-    } catch (error) {
-      console.log(error)
-    }
+    detectEthereumProvider().then(provider => {
+      setProvider(provider)
+      setWeb3(new Web3(provider))
+    })
     //eslint-disable-next-line
   }, [])
 
+  const isMetaMaskInstalled = MetaMaskOnboarding.isMetaMaskInstalled()
+  const onboarding = new MetaMaskOnboarding()
 
   useEffect(() => {
-    (async () => {
-      const id = await recognizeChainId()
-      if (id !== chainId) {
-        setChainId(id)
-      }
-      await initWallet()
-      if (isMetaMaskOnboarded && chainId === process.env.REACT_APP_BLOCKCHAIN_NETWORK_ID && connectedWalletAddress) {
-        setMetaMaskIsReady(true)
-      }
-      else setMetaMaskIsReady(false)
-    })()
-    //eslint-disable-next-line
-  }, [connectWalletLoading, connectedWalletAddress, chainId, metaMaskIsReady, chainChanged]);
+    if (isMetaMaskInstalled && provider) {
+      provider.on('accountsChanged', handleAccountsChanged)
+      provider.on('chainChanged', handleChainChanged)
 
-  const setWalletAddress = async () => {
-    const accounts = await window.ethereum?.request({ method: 'eth_accounts' })
-    setConnectedWalletAddress(accounts[0])
+      // initialize chainId and connectedAccount
+      // handleAccountsChanged()
+      // handleChainChanged()
+    }
+    return () => {
+      onboarding.stopOnboarding()
+    }
+    //eslint-disable-next-line
+  }, [provider])
+
+  const handleAccountsChanged = async () => {
+    // it will only get the account address, not opening metamask
+    const accounts = await provider.request({ method: 'eth_accounts' })
+    if (accounts || accounts.length) {
+      setConnectedAccount(accounts[0])
+    }
   }
 
-  const initWallet = async () => {
-    try {
-      await setWalletAddress()
-    }
-    catch (error) {
-      Alert(error.message)
-      console.log(error)
+  const handleChainChanged = async (...args) => {
+    const currentChainId = await provider.request({ method: 'eth_chainId' })
+    console.log(`Chain ID Changed To: ${currentChainId}`)
+    if (currentChainId) {
+      setChainId(currentChainId)
     }
   }
 
   const connectWallet = async () => {
+    // it will open metamask to get permission if needed
+    setConnectWalletLoading(true)
     try {
-      setConnectWalletLoading(true)
-      const accounts = await window.ethereum?.request({ method: 'eth_requestAccounts' })
-      setConnectedWalletAddress(accounts[0])
-      setConnectWalletLoading(false)
-    } catch (error) {
-      Alert(error.message)
+      const accounts = await provider.request({ method: 'eth_requestAccounts' })
+      setConnectedAccount(accounts[0])
+    } catch (err) {
+      // do nothing
+      console.log('connect wallet rejected', err)
     }
-  }
-
-  const recognizeChainChange = async () => {
-    await ethereum?.on('chainChanged', async () => {
-      const currentChainId = await ethereum?.request({ method: 'eth_chainId' })
-      setChainId(currentChainId)
-      setChainChanged(true)
-      setMetaMaskIsReady(false)
-      if (isMetaMaskOnboarded && currentChainId === process.env.REACT_APP_BLOCKCHAIN_NETWORK_ID && connectedWalletAddress) setMetaMaskIsReady(true)
-      else setMetaMaskIsReady(false)
-    });
-  }
-
-  const recognizeChainId = async () => {
-    // default chain id is set to BSC TESTNET (0x61) in .env file
-    // configs for mainnet and testnet are in "utils/helper.js"
-    try {
-      const currentChainId = await ethereum?.request({ method: 'eth_chainId' })
-      return currentChainId
-    }
-    catch (error) {
-      console.log(error)
-      Alert(error.message)
-    }
+    setConnectWalletLoading(false)
   }
 
   const changeChain = async () => {
+    // it will open metamask to add and switch chain if needed
+    if (chainId === desiredChainId) return
+    setChangeChainLoading(true)
     try {
-      const id = await recognizeChainId()
-      if (id !== process.env.REACT_APP_BLOCKCHAIN_NETWORK_ID) {
-        setChangeChainLoading(true)
-        await addChain() // If it wasn't the specific chain
-        await ethereum?.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: process.env.REACT_APP_BLOCKCHAIN_NETWORK_ID }], // chainId must be in hexadecimal numbers // BNB TESTNET = 0x61 // BNB MAINNET = 0x38 // ETH MAINNET = 0x1
-        })
-        if (isMetaMaskOnboarded && id === process.env.REACT_APP_BLOCKCHAIN_NETWORK_ID) setMetaMaskIsReady(true)
-        setChangeChainLoading(false)
-      }
+      await provider.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: desiredChainId }],
+      })
+    } catch (err) {
+      // do nothing
+      console.log('change chain rejected', err)
     }
-    catch (error) {
-      setChangeChainLoading(false)
-      console.log(error)
-      if (error.code === -32002) {
-        Alert('Request is pending, please open MetaMask.')
-        setChangeChainLoading(true)
-      }
-      setMetaMaskIsReady(false)
-    }
+    setChangeChainLoading(false)
   }
 
-  const addToken = async () => {
+  useEffect(() => {
+    const correctChain = chainId === desiredChainId
+    setMetaMaskIsReady(isMetaMaskInstalled && correctChain)
+    //eslint-disable-next-line
+  }, [connectedAccount, chainId])
+
+  const addTokenToMetaMask = async (tokenAddress, symbol) => {
     try {
-      await ethereum?.request({
+      await window.ethereum.request({
         method: 'wallet_watchAsset',
         params: {
           type: 'ERC20',
-          options: {
-            address: '0x295AB84c45545c6c55aA86711e9B06a6768B5eB4',
-            symbol: 'EP7',
-            decimals: 18,
-            image: '',
-          },
+          options: getMetamaskTokenOptions(tokenAddress, symbol + '_' + tokenAddress.slice(2, 5))
         },
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  const addChain = async () => {
-    try {
-      await ethereum?.request({
-        method: 'wallet_addEthereumChain',
-        params: [chain],
-      });
-    } catch (error) {
-      console.error(error);
+      })
+    } catch (err) {
+      console.log('import asset (add token) rejected', err)
     }
   }
 
   return (
-    <div>
-      {!isMetaMaskOnboarded && (
-        <>
-          <h4 className='my-5'>
-            MetaMask is not installed. Please install MetaMask to use this app.
-          </h4>
-          <MetaMaskInstallModal />
-        </>
-      )}
-
-      {isMetaMaskOnboarded && !connectedWalletAddress &&
-        < Button className={''} disabled={connectWalletLoading} onClick={connectWallet} >
-          {connectWalletLoading ?
-            <span><div className="spinner-border spinner-border-sm p-0" role="status"></div>	&nbsp; Connecting </span> :
-            'Connect Wallet'}
-        </Button>
+    <MetaMaskContext.Provider value={contextStore}>
+      {!metaMaskIsReady &&
+        <div className='metamask-container'>
+          {!isMetaMaskInstalled &&
+            <>
+              <h4 className='my-5'>
+                MetaMask is not installed. Please install MetaMask to use this app.
+              </h4>
+              <MetaMaskInstallModal />
+            </>
+          }
+          {isMetaMaskInstalled && !connectedAccount &&
+            < Button className={''} disabled={connectWalletLoading} onClick={connectWallet} >
+              {connectWalletLoading ?
+                <span><div className="spinner-border spinner-border-sm p-0" role="status"></div>	&nbsp; Connecting </span> :
+                'Connect Wallet'}
+            </Button>
+          }
+          {isMetaMaskInstalled && connectedAccount && chainId !== desiredChainId &&
+            <>
+              <p>
+                <b className='color-red'>Wrong network selected.</b><br />
+                Please switch to the "{desiredChainName}" (chain id: {desiredChainId}) network.
+              </p>
+              <Button className={`btn-danger px-5`} onClick={changeChain} disabled={changeChainLoading} >
+                {changeChainLoading ?
+                  <span className=''><div className="spinner-border spinner-border-sm p-0" role="status" style={{ width: '.9rem', height: '.9rem', fontWeight: 'bold' }}></div>	&nbsp; Pending </span>
+                  : 'change network'}
+              </Button>
+            </>
+          }
+          {isMetaMaskInstalled && connectedAccount && chainId === desiredChainId &&
+            <>
+              <Hash address={connectedAccount}></Hash>
+              <Button className={`btn-danger px-5`} onClick={addTokenToMetaMask} >
+                ADD TOKEN
+              </Button>
+              {children}
+            </>
+          }
+        </div>
       }
 
-      {
-        isMetaMaskOnboarded && connectedWalletAddress && chainId !== process.env.REACT_APP_BLOCKCHAIN_NETWORK_ID &&
-        <Button className={`btn-danger px-5`} onClick={changeChain} disabled={changeChainLoading} >
-          {changeChainLoading ?
-            <span className=''><div className="spinner-border spinner-border-sm p-0" role="status" style={{ width: '.9rem', height: '.9rem', fontWeight: 'bold' }}></div>	&nbsp; Pending </span>
-            : 'change network'}
-        </Button>
-      }
-
-      {
-        isMetaMaskOnboarded && connectedWalletAddress && chainId === process.env.REACT_APP_BLOCKCHAIN_NETWORK_ID &&
+      {metaMaskIsReady &&
         <>
-          <Hash address={connectedWalletAddress}></Hash>
-          <Button className={`btn-danger px-5`} onClick={addToken} >
+          <Hash address={connectedAccount}></Hash>
+          <Button className={`btn-danger px-5`} onClick={addTokenToMetaMask} >
             ADD TOKEN
           </Button>
           {children}
         </>
       }
-    </div>
+    </MetaMaskContext.Provider>
   );
 }
