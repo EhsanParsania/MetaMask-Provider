@@ -105,7 +105,7 @@ export const MetaMaskProvider = ({ children }) => {
 
   useEffect(() => {
     const correctChain = chainId === desiredChainId
-    setMetaMaskIsReady(isMetaMaskInstalled && correctChain)
+    setMetaMaskIsReady(isMetaMaskInstalled && correctChain && connectedAccount)
     //eslint-disable-next-line
   }, [connectedAccount, chainId])
 
