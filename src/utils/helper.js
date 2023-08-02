@@ -1,3 +1,25 @@
+
+export const getMetamaskChainOptions = (chainId, chainName) => ({
+  chainId,
+  chainName,
+  nativeCurrency: {
+    name: process.env.REACT_APP_BLOCKCHAIN_SYMBOL,
+    symbol: process.env.REACT_APP_BLOCKCHAIN_SYMBOL, // 2-6 characters long
+    decimals: 18
+  },
+  // blockExplorerUrls: ['http://'],
+  rpcUrls: [process.env.REACT_APP_BLOCKCHAIN_RPC_URL],
+})
+
+export const getMetamaskTokenOptions = (tokenAddress, tokenName = 'LETH') => ({
+  address: tokenAddress,
+  symbol: tokenName,
+  decimals: 18,
+  image: ''
+})
+
+export const getAddress = contract => contract?._address
+
 const metaMaskConfigs = {
   '0x61': { // BSC TESTNET
     chain: {
