@@ -168,18 +168,9 @@ export const MetaMaskProvider = ({ children }) => {
               </Button>
               {children}
             </>
-          }
+          </div>
         </div>
-      }
 
-      {metaMaskIsReady &&
-        <>
-          <Hash address={connectedAccount}></Hash>
-          <Button className={`btn-danger px-5`} onClick={addTokenToMetaMask} >
-            ADD TOKEN
-          </Button>
-          {children}
-        </>
       }
     </MetaMaskContext.Provider>
   );
