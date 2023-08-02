@@ -2,7 +2,7 @@ import { createContext, useState, useEffect } from 'react'
 import Web3 from "web3"
 import MetaMaskOnboarding from '@metamask/onboarding'
 import detectEthereumProvider from '@metamask/detect-provider'
-import { getMetamaskTokenOptions } from './helper'
+import { getMetamaskTokenOptions } from '../utils/helper'
 import { Hash } from './Hash'
 import { MetaMaskInstallModal } from './MetaMaskInstallModal';
 import { Button } from 'react-bootstrap';
@@ -49,8 +49,8 @@ export const MetaMaskProvider = ({ children }) => {
       provider.on('chainChanged', handleChainChanged)
 
       // initialize chainId and connectedAccount
-      // handleAccountsChanged()
-      // handleChainChanged()
+      handleAccountsChanged()
+      handleChainChanged()
     }
     return () => {
       onboarding.stopOnboarding()
