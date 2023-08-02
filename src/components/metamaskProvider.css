@@ -1,0 +1,11 @@
+.metamask-container {
+    margin: 10vh 10vw;
+}
+
+.metamask-container h4 {
+    margin-block-start: 3em;
+}
+
+.metamask-container h4 + div {
+    margin-left: 3em;
+}
