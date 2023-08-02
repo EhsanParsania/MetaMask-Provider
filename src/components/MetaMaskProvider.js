@@ -155,7 +155,12 @@ export const MetaMaskProvider = ({ children }) => {
               </Button>
             </>
           }
-          {isMetaMaskInstalled && connectedAccount && chainId === desiredChainId &&
+        </div>
+      }
+
+      {metaMaskIsReady &&
+        <div className="card bg-dark m-1 p-5" >
+          <div className="card-body">
             <>
               <Hash address={connectedAccount}></Hash>
               <Button className={`btn-danger px-5`} onClick={addTokenToMetaMask} >
