@@ -36,7 +36,7 @@ const metaMaskConfigs = {
     addressUrl: 'https://testnet.bscscan.com/address/',
     TOKENNAME: {
       address: 'TOKEN_ADDRESS',
-      symbol: 'EVOLVE',
+      symbol: 'EP',
       decimals: 'TOKEN DECIMALS',
     },
   },
@@ -55,7 +55,7 @@ const metaMaskConfigs = {
     addressUrl: 'https://bscscan.com/address/',
     TOKENNAME: {
       address: 'TOKEN_ADDRESS',
-      symbol: 'EVOLVE',
+      symbol: 'EP',
       decimals: 'TOKEN DECIMALS',
     },
   }
