@@ -1,6 +1,6 @@
 {
-  "name": "metamask-react-sample",
-  "version": "0.1.0",
+  "name": "metamask-provider-ts",
+  "version": "3.0.0",
   "private": true,
   "dependencies": {
     "@metamask/detect-provider": "^2.0.0",
