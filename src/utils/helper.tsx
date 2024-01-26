@@ -1,5 +1,5 @@
 
-export const getMetamaskChainOptions = (chainId, chainName) => ({
+export const getMetamaskChainOptions = (chainId: string, chainName: string) => ({
   chainId,
   chainName,
   nativeCurrency: {
@@ -11,14 +11,14 @@ export const getMetamaskChainOptions = (chainId, chainName) => ({
   rpcUrls: [process.env.REACT_APP_BLOCKCHAIN_RPC_URL],
 })
 
-export const getMetamaskTokenOptions = (tokenAddress, tokenName = 'LETH') => ({
+export const getMetamaskTokenOptions = (tokenAddress: string, tokenName = 'LETH') => ({
   address: tokenAddress,
   symbol: tokenName,
   decimals: 18,
   image: ''
 })
 
-export const getAddress = contract => contract?._address
+export const getAddress = (contract: { _address: any }) => contract?._address
 
 const metaMaskConfigs = {
   '0x61': { // BSC TESTNET
@@ -61,5 +61,7 @@ const metaMaskConfigs = {
   }
 }
 
-const metaMaskConfig = metaMaskConfigs[process.env.REACT_APP_BLOCKCHAIN_NETWORK_ID]
-export const { chain, TOKENNAME,addressUrl } = metaMaskConfig
+const metaMaskConfig = process.env.REACT_APP_BLOCKCHAIN_NETWORK_ID
+  ? metaMaskConfigs[process.env.REACT_APP_BLOCKCHAIN_NETWORK_ID as keyof typeof metaMaskConfigs]
+  : undefined;
+  export const { chain, TOKENNAME, addressUrl } = metaMaskConfig || {};

@@ -1,48 +1,37 @@
 import React, { useState, useEffect } from "react";
 import MetaMaskOnboarding from '@metamask/onboarding';
-import { Modal } from "react-bootstrap";
-import { Button } from "react-bootstrap";
+import { Modal, Button as BootstrapButton } from "react-bootstrap";
 
-export const MetaMaskInstallModal = () => {
-  const [modalShow, setModalShow] = useState(false);
-  return (
-    <>
-      <Button className=" mt-2 p-2 " type='button' onClick={() => setModalShow(true)}>
-        Install MetaMask Wallet
-      </Button>
-      <ConnectModal
-        show={modalShow}
-        onHide={() => setModalShow(false)}
-      />
-    </>
-  );
+interface ConnectModalProps {
+  show: boolean;
+  onHide: () => void;
 }
 
-function ConnectModal(props) {
+const ConnectModal: React.FC<ConnectModalProps> = (props) => {
   const onboarding = new MetaMaskOnboarding();
 
   useEffect(() => {
     return () => {
-      onboarding.stopOnboarding()
-    }
-    //eslint-disable-next-line
-  }, [])
+      onboarding.stopOnboarding();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleConnectToWallet = () => {
     onboarding.startOnboarding();
-  }
+  };
 
   const isMobileDevice = () => {
     return 'ontouchstart' in window || 'onmsgesturechange' in window;
-  }
+  };
 
   return (
     <div className="bg-dark">
       <Modal
         {...props}
-        size="md"
+        size="lg"
         aria-labelledby="contained-modal-title-vcenter"
-        contentClassName='bg-dark p-1'
+        contentClassName="bg-dark p-1"
         centered
       >
         <Modal.Header className={` text-white d-flex justify-content-end  cursor-default `}>
@@ -60,7 +49,7 @@ function ConnectModal(props) {
               {
                 isMobileDevice() ?
                   <ConnectToPhoneMetaMask />
-                  : <Button onClick={handleConnectToWallet}>Install Wallet</Button>
+                  : <BootstrapButton onClick={handleConnectToWallet}>Install Wallet</BootstrapButton>
               }
             </div>
           </main>
@@ -68,15 +57,40 @@ function ConnectModal(props) {
       </Modal>
     </div>
   );
+};
+
+interface ConnectToPhoneMetaMaskProps {
+  setUserAddress?: () => void;
 }
 
-
-function ConnectToPhoneMetaMask({ setUserAddress }) {
-  const YOUR_ORIGIN = process.env.REACT_APP_FRONTEND_ORIGIN
-  const metamaskAppDeepLink = "https://metamask.app.link/dapp/" + YOUR_ORIGIN ;   // put your origin here without http:// ro https://
+const ConnectToPhoneMetaMask: React.FC<ConnectToPhoneMetaMaskProps> = ({ setUserAddress }) => {
+  const YOUR_ORIGIN = process.env.REACT_APP_FRONTEND_ORIGIN;
+  const metamaskAppDeepLink = "https://metamask.app.link/dapp/" + YOUR_ORIGIN;   // put your origin here without http:// ro https://
   return (
     <a href={metamaskAppDeepLink}>
-      <Button >Connect to MetaMask</Button>
+      <BootstrapButton>Connect to MetaMask</BootstrapButton>
     </a>
   );
+};
+
+interface MetaMaskInstallModalProps {
+  // add any necessary props
 }
+
+const MetaMaskInstallModal: React.FC<MetaMaskInstallModalProps> = () => {
+  const [modalShow, setModalShow] = useState(false);
+
+  return (
+    <>
+      <BootstrapButton className=" mt-2 p-2 " type='button' onClick={() => setModalShow(true)}>
+        Install MetaMask Wallet
+      </BootstrapButton>
+      <ConnectModal
+        show={modalShow}
+        onHide={() => setModalShow(false)}
+      />
+    </>
+  );
+};
+
+export default MetaMaskInstallModal;
